@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 *.pdf
 *.db
+databases/~$db1.xlsx
