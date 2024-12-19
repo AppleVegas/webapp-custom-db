@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <table id="data" class="table table-striped">
+    <thead>
+      <tr>
+        {% for column in columns %}
+        <th>{{human_columns[column]}} ({{human_measures[column]}})</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for element in elements %}
+        <tr>
+            {% for column in columns %}
+            <th>{{ element[column] }}</th>
+            {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
