@@ -5,7 +5,7 @@
     <thead>
       <tr>
         {% for column in columns %}
-        <th>{{human_columns[column]}} ({{human_measures[column]}})</th>
+        <th>{{human_columns[column]}} ({{human_measures[column]}})<input type="text" name="r1c1" value="" /></th>
         {% endfor %}
       </tr>
     </thead>
@@ -19,4 +19,26 @@
       {% endfor %}
     </tbody>
   </table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(document).ready(function () {
+    $('#data').DataTable({
+      sAjaxSource: '/api/data',
+      serverSide: true,
+      columns: [
+      {% for column in columns %}
+      {data: '{{column}}'},
+      {% endfor %}
+      ],
+      "fnServerData": function (sSource, aoData, fnCallback) {
+            aoData.push({ "name": "test", "value": "some data" });
+            $.getJSON(sSource, aoData, function (json) {
+                fnCallback(json)
+            });
+      },
+    });
+  });
+</script>
 {% endblock %}
