@@ -19,6 +19,61 @@ class DataBase():
         self.con.commit()
         return res.fetchall()
     
+    def get_filtered(self, filter: list, start: int = 0, length: int = 10):
+        
+        where = []
+        for param in filter:
+            if len(param[0]) > 5:
+                if param[0][-5:] == "_vmin":
+                    where.append(f"{param[0]} >= {param[1]}")
+                    continue
+                elif param[0][-5:] == "_vmax":
+                    where.append(f"{param[0]} <= {param[1]}")
+                    continue
+                
+            if param[2] == "TEXT":
+                where.append(f"{param[0]} LIKE \"%{param[1]}%\"")
+                continue
+            
+            where.append(f"{param[0]} = {param[1]}")
+
+        if where:
+            query = "SELECT * FROM database WHERE %s" % " AND ".join(where)
+        else:
+            query = "SELECT * FROM database"
+        
+        query += " LIMIT %i,%i" % (start, length)
+        res = self.cur.execute(query)
+        self.con.commit()
+        return res.fetchall()
+    
+    def get_total_filtered(self, filter: list):
+        
+        where = []
+        for param in filter:
+            if len(param[0]) > 5:
+                if param[0][-5:] == "_vmin":
+                    where.append(f"{param[0]} >= {param[1]}")
+                    continue
+                elif param[0][-5:] == "_vmax":
+                    where.append(f"{param[0]} <= {param[1]}")
+                    continue
+                
+            if param[2] == "TEXT":
+                where.append(f"{param[0]} LIKE \"%{param[1]}%\"")
+                continue
+            
+            where.append(f"{param[0]} = {param[1]}")
+
+        if where:
+            query = "SELECT COUNT(1) FROM database WHERE %s" % " AND ".join(where)
+        else:
+            query = "SELECT COUNT(1) FROM database"
+        
+        res = self.cur.execute(query)
+        self.con.commit()
+        return res.fetchone()[0]
+
     def get_db_title(self) -> str:
         query = "SELECT * FROM database_settings LIMIT 1"
         res = self.cur.execute(query)
@@ -28,8 +83,20 @@ class DataBase():
     def get_columns(self) -> list:
         query = "PRAGMA table_info(database)"
         res = self.cur.execute(query)
-        sql_columns = [c[1] for c in res.fetchall()]
+        sql_columns = [c["name"] for c in res.fetchall()]
         return sql_columns
+    
+    def get_total_rows(self) -> int:
+        query = "SELECT COUNT(1) FROM database"
+        res = self.cur.execute(query)
+        self.con.commit()
+        return res.fetchone()[0]
+    
+    def get_datatypes(self) -> list:
+        query = "PRAGMA table_info(database)"
+        res = self.cur.execute(query)
+        types = [c["type"] for c in res.fetchall()]
+        return types
 
     def get_human(self):
         query = "SELECT * FROM database_definitions LIMIT 2"

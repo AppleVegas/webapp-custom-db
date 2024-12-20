@@ -1,12 +1,12 @@
-DIV.table 
-{
-    display:table;
+body {
+    margin:0;
+    padding:0;
+    background-color: #F8F9FA;
 }
-FORM.tr, DIV.tr
-{
-    display:table-row;
-}
-SPAN.td
-{
-    display:table-cell;
+
+.table-responsive {
+    position: absolute;
+    left: 1%;
+    right: 1%;
+    top: 1%;
 }

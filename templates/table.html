@@ -1,13 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="table-responsive">
+  <h1>{{ title }}</h1>
+  <hr>
   <table id="data" class="table table-striped">
     <thead>
-      <tr>
-        {% for column in columns %}
-        <th>{{human_columns[column]}} ({{human_measures[column]}})<input type="text" name="r1c1" value="" /></th>
-        {% endfor %}
-      </tr>
+        <tr>
+            {% for column in columns %}<td><input type="text" id="search_filter_{{column}}" value="" placeholder="фильтр" style="width: 100%;"/></td>{% endfor %}
+        </tr>
+        <tr>
+            {% for label in labels %}
+            <th>{{label}}</th>
+            {% endfor %}
+        </tr>
     </thead>
     <tbody>
       {% for element in elements %}
@@ -19,26 +25,29 @@
       {% endfor %}
     </tbody>
   </table>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-  $(document).ready(function () {
-    $('#data').DataTable({
-      sAjaxSource: '/api/data',
-      serverSide: true,
-      columns: [
-      {% for column in columns %}
-      {data: '{{column}}'},
-      {% endfor %}
-      ],
-      "fnServerData": function (sSource, aoData, fnCallback) {
-            aoData.push({ "name": "test", "value": "some data" });
-            $.getJSON(sSource, aoData, function (json) {
-                fnCallback(json)
-            });
-      },
+    $(document).ready(function () {
+        var table = $('#data').DataTable({
+            ajax: '/api/data',
+            serverSide: true,
+            dom: 'lrtip',
+            columns: [
+                {% for column in columns %}{data: '{{column}}', searchable: false},{% endfor %}
+            ],
+        });
+    
+    $( 'input[id^="search_filter_"]' ).each(function(index) {
+        $(this).on('change', function(){
+            table
+            .column(index)
+            .search(this.value)
+            .draw();
+        });
     });
-  });
+    });
 </script>
 {% endblock %}
