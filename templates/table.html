@@ -4,25 +4,47 @@
 <div class="table-responsive">
   <h1>{{ title }}</h1>
   <hr>
-  <table id="data" class="table table-striped">
+  <table id="data" class="table table-striped table-bordered">
     <thead>
+        <h4>Фильтрация:</h4>
         <tr>
-            {% for column in columns %}<td><input type="text" id="search_filter_{{column}}" value="" placeholder="фильтр" style="width: 100%;"/></td>{% endfor %}
+            {% for id, param in table_columns.items() %}
+            <td class="filter">
+            <div class="filter-container">
+            {% if param[1] == "TEXT" %}
+            <input type="text" class="filter-inline" id="search_filter_{{id}}" value="" placeholder="Значение"/>
+            {% else %}
+            {% if param[2] %}
+            <input type="number" class="filter-inline hz" id="search_filter_{{id}}_min" value="" placeholder="От"/>
+            <select class="filter-inline mult" id="search_multiplier_{{id}}_min">
+              <option value="Hz">Hz</option>
+              <option value="kHz">kHz</option>
+              <option value="MHz">MHz</option>
+              <option value="GHz">GHz</option>
+            </select>
+            <input type="number" class="filter-inline hz" id="search_filter_{{id}}_max" value="" placeholder="До"/>
+            <select class="filter-inline mult" id="search_multiplier_{{id}}_min">
+              <option value="Hz">Hz</option>
+              <option value="kHz">kHz</option>
+              <option value="MHz">MHz</option>
+              <option value="GHz">GHz</option>
+            </select>
+            {% else %}
+            <input type="number" class="filter-inline" id="search_filter_{{id}}_min" value="" placeholder="От"/>
+            <input type="number" class="filter-inline" id="search_filter_{{id}}_max" value="" placeholder="До"/>
+            {% endif %}
+            {% endif %}
+            </div>
+            </td>
+            {% endfor %}
         </tr>
         <tr>
-            {% for label in labels %}
-            <th>{{label}}</th>
+            {% for id, param in table_columns.items() %}
+            <th>{{param[0]}}</th>
             {% endfor %}
         </tr>
     </thead>
     <tbody>
-      {% for element in elements %}
-        <tr>
-            {% for column in columns %}
-            <th>{{ element[column] }}</th>
-            {% endfor %}
-        </tr>
-      {% endfor %}
     </tbody>
   </table>
 </div>
@@ -30,24 +52,60 @@
 
 {% block scripts %}
 <script>
+    const columns = [{% for id, param in table_columns.items() %}"{{id}}",{% endfor %}]
     $(document).ready(function () {
+        let columns_dt = []
+        for (let i = 0; i < columns.length; i++) {
+            columns_dt.push({data: columns[i], searchable: false});
+        }           
         var table = $('#data').DataTable({
             ajax: '/api/data',
             serverSide: true,
-            dom: 'lrtip',
-            columns: [
-                {% for column in columns %}{data: '{{column}}', searchable: false},{% endfor %}
-            ],
+            dom: 'rtip',
+            columns: columns_dt,
         });
+
+        let hz_to_mul = {
+            hz: 1,
+            khz: 1000,
+            mhz: 1000000,
+            ghz: 1000000000
+        }
+        $('.filter-container').each(function(index){
+            $(this).children().on('change', function(){
+                if ($(this).hasClass("mult")){
+                    $("#" + this.id.replace("multiplier", "filter")).trigger("change")
+                    return
+                }
+                let val = this.value
+                if (this.type == "number"){
+                    if (this.value && $(this).hasClass("hz")){
+                        let str_mult = $(this).next().get(0).value
+                        val *= hz_to_mul[str_mult.toLowerCase()]
+                    }
+                    sibling = $(this).siblings("input").get(0)
     
-    $( 'input[id^="search_filter_"]' ).each(function(index) {
-        $(this).on('change', function(){
-            table
-            .column(index)
-            .search(this.value)
-            .draw();
+                    let siblingval = sibling.value
+
+                    if (sibling.value && $(sibling).hasClass("hz")){
+                        let str_mult = $(sibling).next().get(0).value
+                        siblingval *= hz_to_mul[str_mult.toLowerCase()]
+                    }
+
+                    if(sibling.id.indexOf("min") === -1){
+                        val = val.toString() + "_" + siblingval.toString()
+                    }else{
+                        val = siblingval.toString() + "_" + val.toString()
+                    }
+                    
+                }
+
+                table
+                .column(index)
+                .search(val)
+                .draw();
+            });
         });
-    });
     });
 </script>
 {% endblock %}
