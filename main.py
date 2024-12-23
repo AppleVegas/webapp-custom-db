@@ -77,10 +77,14 @@ def data():
         i += 1
     start = request.args.get('start', type=int)
     length = request.args.get('length', type=int)
+    order = request.args.get(f'order[0][dir]')
+    ordercol = list(table_columns.keys())[int(request.args.get(f'order[0][column]'))]
 
+    if table_columns[ordercol][3]:
+        ordercol = ordercol + ("_vmin" if order == "asc" else "_vmax")
     try:
         lock.acquire(True)
-        elements = db.get_filtered(searchparams, start, length)
+        elements = db.get_filtered(searchparams, start, length, order, ordercol)
         total_filtered = db.get_total_filtered(searchparams)
     finally:
         lock.release()

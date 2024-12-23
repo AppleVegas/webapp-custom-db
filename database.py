@@ -3,6 +3,7 @@ import sqlite3
 def get_filter_query(filter):
     where = []
     for param in filter:
+
         if param["type"] == "TEXT":
             where.append(f"{param['name']} LIKE \"%{param['value']}%\"")
             continue
@@ -42,15 +43,18 @@ class DataBase():
         self.con.commit()
         return res.fetchall()
     
-    def get_filtered(self, filter: list, start: int = 0, length: int = 10):
+    def get_filtered(self, filter: list, start: int = 0, length: int = 10, order = "asc", ordercol = 0):
         
         where = get_filter_query(filter)
+
 
         if where:
             query = "SELECT * FROM database WHERE %s" % where
         else:
             query = "SELECT * FROM database"
         
+        query += f" ORDER BY {ordercol} {order.upper()}"
+
         query += " LIMIT %i,%i" % (start, length)
         res = self.cur.execute(query)
         self.con.commit()
