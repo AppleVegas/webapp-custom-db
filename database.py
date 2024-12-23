@@ -12,9 +12,9 @@ def get_filter_query(filter):
 
         if param["ranged"]:
             if vmin:
-                where.append(f"{param['name']}_vmin <= {vmin}")
+                where.append(f"{param['name']}_vmin <= {vmin} AND {param['name']}_vmax >= {vmin}")
             if vmax:
-                where.append(f"{param['name']}_vmax >= {vmax}")
+                where.append(f"{param['name']}_vmax >= {vmax} AND {param['name']}_vmin <= {vmax}")
             continue
             
         if vmin:

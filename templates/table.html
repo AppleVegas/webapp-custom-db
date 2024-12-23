@@ -62,7 +62,7 @@
                     data: columns[i], 
                     searchable: false,
                     createdCell: function (td, cellData, rowData, row, col) {
-                        $(td).html("<a href='/sheets/"+cellData.replace(/[^a-zA-Z0-9а-яА-ЯёЁ]/g,"_")+"'>"+cellData+"</a>");
+                        $(td).html("<a href='/sheets/"+cellData.replace(/[^a-zA-Z0-9а-яА-ЯёЁ]/g,"_")+"' target='_blank'>"+cellData+"</a>");
                     }
                     });
                 continue
@@ -75,6 +75,24 @@
             dom: 'rtip',
             columns: columns_dt,
             'iDisplayLength': 10,
+            "oLanguage": {
+                "sZeroRecords": "Ничего не найдено",
+                "sInfo": "Отображено с _START_ до _END_ из _TOTAL_",
+                "sInfoEmpty": "Ничего не отображено",
+                "sInfoFiltered": "(всего _MAX_)",
+                "paginate": {
+                    "first":      "Первая",
+                    "last":       "Последняя",
+                    "next":       "Следующая",
+                    "previous":   "Предыдущая"
+                },
+            },
+            language: {
+                paginate: {
+                    next: "Следующая",
+                    previous: "Предыдущая"
+                }
+            }
         });
 
         let hz_to_mul = {
