@@ -3,20 +3,24 @@ import sqlite3
 def get_filter_query(filter):
     where = []
     for param in filter:
-        if len(param[0]) > 5:
-            if param[0][-5:] == "_vmin":
-                where.append(f"{param[0]} >= {param[1]}")
-                continue
-            elif param[0][-5:] == "_vmax":
-                where.append(f"{param[0]} <= {param[1]}")
-                continue
-            
-        if param[2] == "TEXT":
-            where.append(f"{param[0]} LIKE \"%{param[1]}%\"")
+        if param["type"] == "TEXT":
+            where.append(f"{param['name']} LIKE \"%{param['value']}%\"")
             continue
         
-        where.append(f"{param[0]} = {param[1]}")
-    
+        vmin, vmax = param["value"].split("_")
+
+        if param["ranged"]:
+            if vmin:
+                where.append(f"{param['name']}_vmin <= {vmin}")
+            if vmax:
+                where.append(f"{param['name']}_vmax >= {vmax}")
+            continue
+            
+        if vmin:
+            where.append(f"{param['name']} >= {vmin}")
+        if vmax:
+            where.append(f"{param['name']} <= {vmax}")
+
     return " AND ".join(where) if where else None
 
 class DataBase():

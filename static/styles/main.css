@@ -8,24 +8,38 @@ body {
     background-color: #F8F9FA;
 }
 
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+select {
+    -webkit-appearance: none;
+    text-indent: 1px;
+    text-overflow: '';
+}
+
 .table-responsive {
     position: absolute;
-    left: 20px;
+    left: 1%;
     right: 1%;
     top: 1%;
 }
+
 
 td.filter {
     white-space: nowrap;
 }
 
 div.filter-container {
+    
     width: 100%;
     display: flex;
     flex-direction: row;
 }
 
 .filter-inline {
+    min-width: 30px;
     width: 100%;
     flex: 1;
     margin: 1px;

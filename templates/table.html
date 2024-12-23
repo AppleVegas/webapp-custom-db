@@ -35,6 +35,7 @@
             {% endif %}
             {% endif %}
             </div>
+            <button type="button" style="width: 100%;" class="clear-filter">Отчистить</button>
             </td>
             {% endfor %}
         </tr>
@@ -56,6 +57,16 @@
     $(document).ready(function () {
         let columns_dt = []
         for (let i = 0; i < columns.length; i++) {
+            if (columns[i] == "name"){
+                columns_dt.push({
+                    data: columns[i], 
+                    searchable: false,
+                    createdCell: function (td, cellData, rowData, row, col) {
+                        $(td).html("<a href='/sheets/"+cellData.replace(/[^a-zA-Z0-9а-яА-ЯёЁ]/g,"_")+"'>"+cellData+"</a>");
+                    }
+                    });
+                continue
+            }
             columns_dt.push({data: columns[i], searchable: false});
         }           
         var table = $('#data').DataTable({
@@ -63,6 +74,7 @@
             serverSide: true,
             dom: 'rtip',
             columns: columns_dt,
+            'iDisplayLength': 10,
         });
 
         let hz_to_mul = {
@@ -78,6 +90,7 @@
                     return
                 }
                 let val = this.value
+                console.log($(this).width())
                 if (this.type == "number"){
                     if (this.value && $(this).hasClass("hz")){
                         let str_mult = $(this).next().get(0).value
@@ -104,6 +117,17 @@
                 .column(index)
                 .search(val)
                 .draw();
+            });
+        });
+        $('.clear-filter').each(function(index){
+            $(this).on('click', function(){
+                $(this).prev().children("input").each(function(){
+                    this.value = ''
+                    table
+                    .column(index)
+                    .search('')
+                    .draw();
+                });
             });
         });
     });
