@@ -1,8 +1,21 @@
 from flask import Flask, render_template, request,  send_from_directory
 from database import DataBase
 import threading
+import webbrowser
+import random
+import os 
+import sys
 
+basepath = ''
 
+if getattr(sys, 'frozen', False):
+    template_folder = os.path.join(sys._MEIPASS, 'templates')
+    static_folder = os.path.join(sys._MEIPASS, 'static')
+    basepath = os.path.dirname(sys.executable) + "/"
+    app = Flask(__name__, template_folder=template_folder, static_folder=static_folder)
+else:
+    app = Flask(__name__)
+    
 DB_NAME = "db1"
 
 
@@ -59,7 +72,7 @@ def table():
 
 @app.route("/sheets/<path:path>")
 def sheets(path):
-    return send_from_directory(f'databases/{DB_NAME}', path + ".pdf")
+    return send_from_directory(f'{basepath}databases/{DB_NAME}', path + ".pdf")
 
 @app.route('/api/data')
 def data():
@@ -115,4 +128,7 @@ def data():
         'recordsTotal': total_rows,
         'draw': request.args.get('draw', type=int),
         }
-app.run(debug=True)
+
+port = random.randint(5000, 5128)
+webbrowser.open('http://127.0.0.1:' + str(port), new = 2)
+app.run(debug=False, port=port)
